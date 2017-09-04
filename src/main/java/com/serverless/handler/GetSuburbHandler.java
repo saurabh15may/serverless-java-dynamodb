@@ -26,17 +26,25 @@ public class GetSuburbHandler implements RequestHandler<Map<String, Object>, Api
 		LOG.info("postcode: " + postcode);
         Suburb suburb= null;
 
-        if(postcode != null)
+        Map<String, String> headers = new HashMap<>();
+        headers.put("X-Powered-By", "AWS Lambda & Serverless");
+        headers.put("Content-Type", "application/json");
+
+        if(postcode != null){
             suburb = DynamoDBHelper.getRecordforPostcode(postcode);
 
-        Map<String, String> headers = new HashMap<>();
-		headers.put("X-Powered-By", "AWS Lambda & Serverless");
-		headers.put("Content-Type", "application/json");
-		return ApiGatewayResponse.builder()
-				.setStatusCode(200)
-				.setObjectBody(suburb)
-				.setHeaders(headers)
-				.build();
+            return ApiGatewayResponse.builder()
+                    .setStatusCode(200)
+                    .setObjectBody(suburb)
+                    .setHeaders(headers)
+                    .build();
+        }
+        
+        return ApiGatewayResponse.builder()
+        .setStatusCode(400)
+        .setObjectBody("400 Bad Parameter")
+        .setHeaders(headers)
+        .build();  
     }
 
 }

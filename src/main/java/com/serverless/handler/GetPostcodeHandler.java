@@ -19,24 +19,29 @@ public class GetPostcodeHandler implements RequestHandler<Map<String, Object>, A
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
-        String suburbName = (String) input.get("suburb");
+        String suburbName = (String) input.get("name");
         //Util.checkParameter(suburbName,Constants.SUBURB);
         
-        LOG.info("suburbName: " + suburbName);
-        
+		LOG.info("suburbName: " + suburbName);
 		Suburb suburb= null;
-        
-        if(suburbName != null)
-            suburb = DynamoDBHelper.getRecordforSuburb(suburbName);
-
         Map<String, String> headers = new HashMap<>();
-		headers.put("X-Powered-By", "AWS Lambda & Serverless");
-		headers.put("Content-Type", "application/json");
-		return ApiGatewayResponse.builder()
-				.setStatusCode(200)
-				.setObjectBody(suburb)
-				.setHeaders(headers)
-				.build();
+        headers.put("X-Powered-By", "AWS Lambda & Serverless");
+        headers.put("Content-Type", "application/json");
+
+        if(suburbName != null){
+            suburb = DynamoDBHelper.getRecordforSuburb(suburbName);
+            return ApiGatewayResponse.builder()
+                    .setStatusCode(200)
+                    .setObjectBody(suburb)
+                    .setHeaders(headers)
+                    .build();
+        }
+
+        return ApiGatewayResponse.builder()
+        .setStatusCode(400)
+        .setObjectBody("400 Bad Parameter")
+        .setHeaders(headers)
+        .build();
     }
 
 }

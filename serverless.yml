@@ -14,7 +14,7 @@ functions:
     handler: com.serverless.handler.GetSuburbHandler
     events:
       - http:
-          path: suburb
+          path: suburbs/postcode/{postcode}
           method: get
           cors: true
           integration: lambda
@@ -29,7 +29,7 @@ functions:
     handler: com.serverless.handler.GetPostcodeHandler
     events:
       - http:
-          path: postcode
+          path: suburbs/name/{name}
           method: get
           cors: true
           integration: lambda
@@ -37,7 +37,7 @@ functions:
             template:
               application/json: >
                 {
-                  "suburb" : "$input.params('suburb')"
+                  "name" : "$input.params('name')"
                 }
 
   createSuburb:
