@@ -2,7 +2,6 @@ package com.serverless.handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.serverless.model.Suburb;
 import java.util.Map;
 import com.serverless.model.ApiGatewayResponse;
 import com.serverless.util.Constants;
@@ -19,32 +18,36 @@ public class GetSuburbHandler implements RequestHandler<Map<String, Object>, Api
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
 
-        String postcode = (String) input.get("postcode");
-
-        //Util.checkParameter(postcode,Constants.POSTCODE);
+        String postcode = (String) input.get("value");
+        LOG.info("postcode: " + postcode);
+        Util.checkParameter(postcode,Constants.POSTCODE);
+ 
+        int statusCode = 0;
+        Object responseBody = null;  
+		Map<String, String> headers = createHeader();
        
-		LOG.info("postcode: " + postcode);
-        Suburb suburb= null;
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("X-Powered-By", "AWS Lambda & Serverless");
-        headers.put("Content-Type", "application/json");
-
-        if(postcode != null){
-            suburb = DynamoDBHelper.getRecordforPostcode(postcode);
-
-            return ApiGatewayResponse.builder()
-                    .setStatusCode(200)
-                    .setObjectBody(suburb)
-                    .setHeaders(headers)
-                    .build();
+        try{
+            //Search record from DynamoDB
+            responseBody = DynamoDBHelper.getRecordforPostcode(postcode);
+            statusCode = Constants.STATUS_CODE_SUCCESS;
+        }catch(Exception e){
+            LOG.error("Exception in getting record from DynamoDB: "+e);
+            responseBody = Constants.RESPONSE_ERROR;
+            statusCode = Constants.STATUS_CODE_ERROR;
         }
-        
+
         return ApiGatewayResponse.builder()
-        .setStatusCode(400)
-        .setObjectBody("400 Bad Parameter")
+        .setStatusCode(statusCode)
+        .setObjectBody(responseBody)
         .setHeaders(headers)
-        .build();  
+        .build();
     }
+
+    private static Map<String, String> createHeader(){
+		Map<String, String> headers = new HashMap<>();
+		headers.put("X-Powered-By", "AWS Lambda & Serverless");
+		headers.put("Content-Type", "application/json");
+		return headers;
+	}
 
 }
