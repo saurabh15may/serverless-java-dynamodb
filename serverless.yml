@@ -1,0 +1,80 @@
+service: suburb-postcode-microservice
+
+frameworkVersion: ">=1.2.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: java8
+  
+package:
+  artifact: target/suburb-postcode-microservice.jar
+
+functions:
+  getSuburb:
+    handler: com.serverless.handler.GetSuburbHandler
+    events:
+      - http:
+          path: suburb
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: >
+                {
+                  "postcode" : "$input.params('postcode')"
+                }
+
+  getPostcode:
+    handler: com.serverless.handler.GetPostcodeHandler
+    events:
+      - http:
+          path: postcode
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: >
+                {
+                  "suburb" : "$input.params('suburb')"
+                }
+
+  createSuburb:
+      handler: com.serverless.handler.CreateSuburbHandler
+      events:
+        - http:
+            path: suburb/create
+            method: post
+            cors: true
+            
+  
+resources:
+  Resources:
+    DynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SuburbPostcode
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    DynamoDBIamPolicy:
+        Type: AWS::IAM::Policy
+        DependsOn: DynamoDbTable
+        Properties:
+          PolicyName: AWSLambdaInvocation-DynamoDB
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                Resource: arn:aws:dynamodb:*:*:table/SuburbPostcode
+          Roles:
+            - Ref: IamRoleLambdaExecution

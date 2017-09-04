@@ -1,0 +1,18 @@
+*.class
+/build/
+/bin/
+/.settings/
+.project
+.classpath
+.settings
+.vscode
+target
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Serverless directories
+.serverless
+
