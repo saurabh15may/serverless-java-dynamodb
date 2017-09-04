@@ -43,5 +43,7 @@ functions:
 
 #### Test the created lambda function on local
 >serverless invoke --aws-profile sktest --function createSuburb --path data.json
+
 >serverless invoke --aws-profile sktest --f getSuburb --log {"pathParameters":{"value":"3008"}}
+
 >serverless invoke --aws-profile sktest --f getPostcode --log {"pathParameters":{"value":"Docklands"}}
